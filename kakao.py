@@ -27,12 +27,42 @@ def oauth():
     url = "https://kapi.kakao.com/v1/user/me"
     profile_request = requests.get("https://kapi.kakao.com/v2/user/me", headers={"Authorization" : f"Bearer {access_token}"},
             )
-    profile_json = profile_request.json()
-    kakao_account = profile_json.get("kakao_account")
-    email = kakao_account.get("email", None)
-    kakao_id = profile_json.get("id")
 
-    return (profile_request.text)
+    url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
+
+    headers = {
+        "Authorization": "Bearer " + str(access_token)
+    }
+
+    data = {
+        "template_object": json.dumps({"object_type": "text",
+                                       "text": "Hello, world!",
+                                       "link": {
+                                           "web_url": "www.naver.com"
+                                       }
+                                       })
+    }
+
+    response = requests.post(url, headers=headers, data=data)
+    response.status_code
+    if response.json().get('result_code') == 0:
+        return ('메시지를 성공적으로 보냈습니다.')
+    else:
+        return('메시지를 성공적으로 보내지 못했습니다. 오류메시지 : ' + str(response.json()))
+
+
+def make_message(text):
+    temp = {
+        "object_type": "text",
+        "text": "hello",
+        "link": {
+            "web_url": "https://developers.kakao.com",
+            "mobile_web_url": "https://developers.kakao.com"
+        },
+        "button_title": "바로 확인",
+    }
+
+    return {"template_object":json.dumps(temp)}
 
 
 if __name__ == '__main__':
