@@ -11,14 +11,13 @@ def hello_world():
 def oauth():
     code = str(request.args.get('code'))
     url = "https://kauth.kakao.com/oauth/token"
-    payload = "grant_type=authorization_code&client_id=43e3daf58dd14d049001ebdbd6538f58&redirect_uri=http://127.0.0.1:5000/oauth&code="+str(code)
+    payload = "grant_type=authorization_code&client_id=43e3daf58dd14d049001ebdbd6538f58&redirect_uri=http://13.125.177.64:5000/oauth&code="+str(code)
     headers = {
                'Content-Type': "application/x-www-form-urlencoded",
                'Cache-Control': "no-cache",
                }
     response = requests.request("POST",url,data=payload,headers=headers)
     access_token = json.loads(((response.text).encode('utf-8')))['access_token']
-
 
     url = "https://kapi.kakao.com/v1/user/signup"
     headers.update({'Authorization' : "Bearer " + str(access_token)})
@@ -64,6 +63,8 @@ def make_message(text):
 
     return {"template_object":json.dumps(temp)}
 
+host_addr = "0.0.0.0"
+port_num = "5000"
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host=host_addr, port=port_num)
