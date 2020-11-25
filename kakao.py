@@ -34,7 +34,7 @@ def oauth():
     if response.status_code == 200:
         return ('메시지를 성공적으로 보냈습니다.')
     else:
-        return('메시지를 성공적으로 보내지 못했습니다. 오류메시지 : ' + str(response.json()) + str(type(post)))
+        return('메시지를 성공적으로 보내지 못했습니다. 오류메시지 : ' + str(response.json()))
 
 def token():
     code = str(request.args.get('code'))
