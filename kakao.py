@@ -12,32 +12,55 @@ def hello_world():
 
 @app.route('/oauth')
 def oauth():
-    global access_token
-    code = str(request.args.get('code'))
-    url = "https://kauth.kakao.com/oauth/token"
-    payload = "grant_type=authorization_code&client_id=43e3daf58dd14d049001ebdbd6538f58&redirect_uri=http://13.125.177.64:5000/oauth&code="+str(code)
-    headers = {
-               'Content-Type': "application/x-www-form-urlencoded",
-               'Cache-Control': "no-cache",
-               }
-    response = requests.request("POST",url,data=payload,headers=headers)
-    access_token = str(json.loads(((response.text).encode('utf-8')))['access_token'])
 
+    access_token = token()
 
     url = "https://kapi.kakao.com/v1/user/signup"
-    headers.update({'Authorization' : "Bearer " + access_token})
+    headers = {
+        'Content-Type': "application/x-www-form-urlencoded",
+        'Cache-Control': "no-cache",
+        'Authorization': "Bearer " + str(access_token)
+    }
     response = requests.request("POST",url,headers=headers)
-    
+
     url = "https://kapi.kakao.com/v1/user/me"
-    profile_request = requests.get("https://kapi.kakao.com/v2/user/me", headers={"Authorization" : f"Bearer {access_token}"},
+    profile_request = requests.get(url, headers={'Authorization' : f"Bearer {access_token}"},
             )
-<<<<<<< HEAD
-    profile_json = profile_request.json()
-    kakao_account = profile_json.get("kakao_account")
-    email = kakao_account.get("email", None)
-    kakao_id = profile_json.get("id")
-    
-    return profile_request.text
+
+    url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
+
+    response = requests.post(url, headers=headers, data=make_message("hello"))
+
+    if response.status_code == 200:
+        return ('메시지를 성공적으로 보냈습니다.')
+    else:
+        return('메시지를 성공적으로 보내지 못했습니다. 오류메시지 : ' + str(response.json()) + str(type(post)))
+
+def token():
+    code = str(request.args.get('code'))
+    url = "https://kauth.kakao.com/oauth/token"
+    payload = "grant_type=authorization_code&client_id=43e3daf58dd14d049001ebdbd6538f58&redirect_uri=http://127.0.0.1:5000/oauth&code=" + str(code)
+    headers = {
+        'Content-Type': "application/x-www-form-urlencoded",
+        'Cache-Control': "no-cache",
+    }
+    response = requests.request("POST", url, data=payload, headers=headers)
+    access_token = json.loads(((response.text).encode('utf-8')))['access_token']
+
+    return access_token
+
+
+def make_message(text):
+    temp = {
+        "object_type": "text",
+        "text": "hello",
+        "link": {
+            "web_url": "https://developers.kakao.com",
+        },
+        "button_title": "바로 확인",
+    }
+
+    return {"template_object":json.dumps(temp)}
 
 @app.route('/logout')
 def logout():
@@ -87,7 +110,6 @@ def plus() :
     url = "https://kauth.kakao.com/oauth/authorize?client_id=43e3daf58dd14d049001ebdbd6538f58&redirect_uri=http://13.125.177.64:5000/plus&response_type=code&scope={required_scopes.join('talk_message')}"
     response = requests.get(url)
     return response.text
-=======
 
     url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
 
@@ -124,7 +146,7 @@ def make_message(text):
     }
 
     return {"template_object":json.dumps(temp)}
->>>>>>> ccad1769ad90c6d90a9c3517f0350270ec1b9522
+
 
 host_addr = "0.0.0.0"
 port_num = "5000"
