@@ -12,29 +12,55 @@ def hello_world():
 
 @app.route('/oauth')
 def oauth():
-
     access_token = token()
-
-    url = "https://kapi.kakao.com/v1/user/signup"
     headers = {
         'Content-Type': "application/x-www-form-urlencoded",
         'Cache-Control': "no-cache",
-        'Authorization': "Bearer " + str(access_token)
     }
-    response = requests.request("POST",url,headers=headers)
+
+    url = "https://kapi.kakao.com/v1/user/signup"
+    headers.update({'Authorization': "Bearer " + str(access_token)})
+    response = requests.request("POST", url, headers=headers)
 
     url = "https://kapi.kakao.com/v1/user/me"
-    profile_request = requests.get(url, headers={'Authorization' : f"Bearer {access_token}"},
-            )
+    profile_request = requests.get(url, headers={'Authorization': f"Bearer {access_token}"},
+                                   )
 
-    url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
+    url = "https://kauth.kakao.com/oauth/authorize?client_id=43e3daf58dd14d049001ebdbd6538f58&redirect_uri=http://127.0.0.1:5000/oauth&response_type=code&scope=talk_message"
 
-    response = requests.post(url, headers=headers, data=make_message("hello"))
+    headers = {
+        'Content-Type': "application/x-www-form-urlencoded",
+        'Authorization': "Bearer " + str(access_token),
+    }
+
+    response = requests.get(url, headers=headers)
+
+    url = "https://kapi.kakao.com/v1/api/talk/friends"  ##친구 목록 불러오기
+    response = requests.get(url, headers=headers)
+
+    url = "https://kapi.kakao.com/v1/api/talk/friends/message/default/send"  ##친구에게 메시지 보내기
+    uuidsData = {'receiver_uuids': '["iLmOvIi7jbiNoZivn6uarJigjLmJuYy4geA"]'}
+
+    post = {
+        "object_type": "text",
+        "text": "hello",
+        "link": {
+            "web_url": "https://developers.kakao.com",
+        },
+        "button_title": "바로 확인",
+    }
+
+    data = {'template_object': json.dumps(post)}
+    uuidsData.update(data)
+
+    response = requests.post(url, headers=headers, data=uuidsData)
 
     if response.status_code == 200:
-        return ('메시지를 성공적으로 보냈습니다.')
+        return "sucess"
     else:
-        return('메시지를 성공적으로 보내지 못했습니다. 오류메시지 : ' + str(response.json()))
+        print(response.status_code)
+        return response.text
+
 
 def token():
     code = str(request.args.get('code'))
