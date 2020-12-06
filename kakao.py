@@ -57,6 +57,27 @@ def token():
     return access_token
 
 
+@app.route('/kakaostory')
+def kakaostory():
+    access_token = token()
+    print(access_token)
+
+    # 게시물 쓰기
+    url = "https://kapi.kakao.com/v1/api/story/post/note"
+    payload = 'content=POSTING_TEST'  # <-내용
+    headers = {
+        'Content-Type': "application/x-www-form-urlencoded",
+        'Cache-Control': "no-cache",
+        "Authorization": f"Bearer {access_token}"
+    }
+    requests.request("POST", url, data=payload, headers=headers)
+
+    requests.get("https://kapi.kakao.com/v1/api/story/profile",
+                 headers={"Authorization": f"Bearer {access_token}"}, )
+    # id값 스토리 받기
+    response = requests.get("https://kapi.kakao.com/v1/api/story/mystory?id=_CCc7Q8.hCxTbltQ9uA",
+                            headers={"Authorization": f"Bearer {access_token}"}, )
+    return (response.text)
 @app.route('/friend_message')
 def friend_message():
     access_token = token()
