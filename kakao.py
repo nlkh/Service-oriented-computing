@@ -10,36 +10,43 @@ access_token = ""
 def hello_world():
     return render_template('index.html')
 
+
 @app.route('/oauth')
 def oauth():
-
     access_token = token()
-
-    url = "https://kapi.kakao.com/v1/user/signup"
     headers = {
         'Content-Type': "application/x-www-form-urlencoded",
         'Cache-Control': "no-cache",
-        'Authorization': "Bearer " + str(access_token)
     }
-    response = requests.request("POST",url,headers=headers)
+
+    url = "https://kapi.kakao.com/v1/user/signup"
+    headers.update({'Authorization': "Bearer " + str(access_token)})
+    response = requests.request("POST", url, headers=headers)
 
     url = "https://kapi.kakao.com/v1/user/me"
-    profile_request = requests.get(url, headers={'Authorization' : f"Bearer {access_token}"},
-            )
+    profile_request = requests.get(url, headers={'Authorization': f"Bearer {access_token}"},
+                                   )
 
-    url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
+    url = "https://kauth.kakao.com/oauth/authorize?client_id=43e3daf58dd14d049001ebdbd6538f58&redirect_uri=http://127.0.0.1:5000/oauth&response_type=code&scope=talk_message"
 
-    response = requests.post(url, headers=headers, data=make_message("hello"))
+    headers = {
+        'Content-Type': "application/x-www-form-urlencoded",
+        'Authorization': "Bearer " + str(access_token),
+    }
 
-    if response.status_code == 200:
-        return ('메시지를 성공적으로 보냈습니다.')
-    else:
-        return('메시지를 성공적으로 보내지 못했습니다. 오류메시지 : ' + str(response.json()) + str(type(post)))
+    response = requests.get(url, headers=headers)
+
+    url = "https://kapi.kakao.com/v1/api/talk/friends"  ##친구 목록 불러오기
+    response = requests.get(url, headers=headers)
+
+    return response.json()
+
 
 def token():
     code = str(request.args.get('code'))
     url = "https://kauth.kakao.com/oauth/token"
-    payload = "grant_type=authorization_code&client_id=43e3daf58dd14d049001ebdbd6538f58&redirect_uri=http://127.0.0.1:5000/oauth&code=" + str(code)
+    payload = "grant_type=authorization_code&client_id=43e3daf58dd14d049001ebdbd6538f58&redirect_uri=http://127.0.0.1:5000/oauth&code=" + str(
+        code)
     headers = {
         'Content-Type': "application/x-www-form-urlencoded",
         'Cache-Control': "no-cache",
@@ -50,8 +57,39 @@ def token():
     return access_token
 
 
-def make_message(text):
-    temp = {
+@app.route('/kakaostory')
+def kakaostory():
+    access_token = token()
+    print(access_token)
+
+    # 게시물 쓰기
+    url = "https://kapi.kakao.com/v1/api/story/post/note"
+    payload = 'content=POSTING_TEST'  # <-내용
+    headers = {
+        'Content-Type': "application/x-www-form-urlencoded",
+        'Cache-Control': "no-cache",
+        "Authorization": f"Bearer {access_token}"
+    }
+    requests.request("POST", url, data=payload, headers=headers)
+
+    requests.get("https://kapi.kakao.com/v1/api/story/profile",
+                 headers={"Authorization": f"Bearer {access_token}"}, )
+    # id값 스토리 받기
+    response = requests.get("https://kapi.kakao.com/v1/api/story/mystory?id=_CCc7Q8.hCxTbltQ9uA",
+                            headers={"Authorization": f"Bearer {access_token}"}, )
+    return (response.text)
+@app.route('/friend_message')
+def friend_message():
+    access_token = token()
+    print(access_token)
+    headers = {
+        'Authorization': "Bearer " + str(access_token),
+    }
+    url = "https://kapi.kakao.com/v1/api/talk/friends/message/default/send"  ##친구에게 메시지 보내기
+
+    uuidsData = {'receiver_uuids': '["iLmOvIi7jbiNoZivn6uarJigjLmJuYy4geA"]'}
+
+    post = {
         "object_type": "text",
         "text": "hello",
         "link": {
@@ -60,92 +98,26 @@ def make_message(text):
         "button_title": "바로 확인",
     }
 
-    return {"template_object":json.dumps(temp)}
+    data = {'template_object': json.dumps(post)}
+    uuidsData.update(data)
+
+    response = requests.post(url, headers=headers, data=uuidsData)
+
+    if response.status_code == 200:
+        return "sucess"
+    else:
+        print(response.status_code)
+        return response.text
+
 
 @app.route('/logout')
 def logout():
-    
     url = "https://kapi.kakao.com/v1/user/logout"
     headers = {
-        "Authorization": "Bearer " + access_token
+        "Authorization": "Bearer " + str(token())
     }
     response = requests.post(url, headers=headers)
     return response.json()
-
-@app.route('/unlink')
-def unlink():
-    
-    url = "https://kapi.kakao.com/v1/user/unlink"
-    headers = {
-        "Authorization": "Bearer " + access_token
-    }
-    response = requests.post(url, headers=headers)
-    return response.json()
-
-@app.route('/message')
-def message():
-    
-    url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
-    headers = {
-        "Authorization": "Bearer " + access_token
-    }
-    data = {
-        "template_object": json.dumps({"object_type": "text",
-                                       "text": "Hello, world!",
-                                       "link": {
-                                           "web_url": "www.naver.com"
-                                       },
-                                       "scope" : ["talk_message", "friends"]
-                                       })
-    }
-    response = requests.post(url, headers=headers, data=data)
-    response.status_code
-    if response.json().get('result_code') == 0:
-        return ('메시지를 성공적으로 보냈습니다.')
-    else:
-        return('메시지를 성공적으로 보내지 못했습니다. 오류메시지 : ' + str(response.json()) + access_token)
-
-@app.route('/plus')
-def plus() :
-    url = "https://kauth.kakao.com/oauth/authorize?client_id=43e3daf58dd14d049001ebdbd6538f58&redirect_uri=http://13.125.177.64:5000/plus&response_type=code&scope={required_scopes.join('talk_message')}"
-    response = requests.get(url)
-    return response.text
-
-    url = "https://kapi.kakao.com/v2/api/talk/memo/default/send"
-
-    headers = {
-        "Authorization": "Bearer " + str(access_token)
-    }
-
-    data = {
-        "template_object": json.dumps({"object_type": "text",
-                                       "text": "Hello, world!",
-                                       "link": {
-                                           "web_url": "www.naver.com"
-                                       }
-                                       })
-    }
-
-    response = requests.post(url, headers=headers, data=data)
-    response.status_code
-    if response.json().get('result_code') == 0:
-        return ('메시지를 성공적으로 보냈습니다.')
-    else:
-        return('메시지를 성공적으로 보내지 못했습니다. 오류메시지 : ' + str(response.json()))
-
-
-def make_message(text):
-    temp = {
-        "object_type": "text",
-        "text": "hello",
-        "link": {
-            "web_url": "https://developers.kakao.com",
-            "mobile_web_url": "https://developers.kakao.com"
-        },
-        "button_title": "바로 확인",
-    }
-
-    return {"template_object":json.dumps(temp)}
 
 
 host_addr = "0.0.0.0"
