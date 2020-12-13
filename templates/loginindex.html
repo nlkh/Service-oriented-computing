@@ -71,9 +71,9 @@
           <div class="card-body">
             <form>
               <div class="form-group">
-                <textarea class="form-control" rows="10"></textarea>
+                <textarea id="messageBox" class="form-control" rows="10"></textarea>
               </div>
-              <button type="submit" class="btn btn-primary">Submit</button>
+              <button type="button" id="submitBtn" class="btn btn-primary" onclick="submitClick()">Submit</button>
             </form>
           </div>
         </div>
@@ -86,10 +86,13 @@
           <h5 class="card-header">Facebook Post </h5>
           <div class="card-body">
             <div class="input-group">
-              <select name ="facebook_post" class="form-control" placeholder="Content...">
+              <select name ="facebook_post" id="fb_posts" class="form-control" placeholder="Content...">
                 <option value='' selected>--selected--</option>
               </select>
-              <button type="button" class="btn btn-primary" onclick="https://serviceoriented.ml:5000/kakaostory">check</button>
+              <button type="button" class="btn btn-primary" onclick="fbLoadBtnClick()">check</button>
+              <button type="submit" class="btn btn-primary" onclick="fb_selectEvent()">select</button> 
+              <button type="button" class="btn btn-primary" onclick="fbLinkBtnClick()">login</button>
+                
             </div>
           </div>
         </div>
@@ -99,10 +102,45 @@
           <h5 class="card-header">Kakao story Post </h5>
           <div class="card-body">
             <div class="input-group">
-              <select name ="kakao_story_post" class="form-control" placeholder="Content...">
+              <select name ="kakao_story_post" id="kakao_story_post" class="form-control" placeholder="Content...">
                 <option value='' selected>--selected--</option>
+
               </select>
-              <button type="submit" class="btn btn-primary" >check</button>
+
+              <button type="submit" class="btn btn-primary" onclick="jQueryajaxJSON()">check</button>
+              <button type="submit" class="btn btn-primary" onclick="selectEvent()">select</button> 
+                <script>
+                  let postSelect = document.getElementById("kakao_story_post");
+                  let selectEvent = function(){
+                  let text = postSelect.options[postSelect.selectedIndex].text;
+                  console.log(text);
+                  document.getElementById("messageBox").value = text;
+                }
+                    
+                var post_count = 0;
+                function jQueryajaxJSON(){
+                  if(post_count == 0){
+                    var content2= new Array;
+                    var post = new Array;
+                    $.ajax({
+
+                        url : "https://serviceoriented.ml:5000/kakaostory",
+                        dataType : "json",
+                        success:function(data){
+
+                        for(key in data){
+                              content2[key] = data[key].content;
+                              var option = $("<option value="+content2[key] +">"+content2[key]+"</option>");
+                              $("#kakao_story_post").append(option);
+                             }
+                          }
+                        })
+                       post_count++;
+                  }
+              }
+
+              </script>
+
             </div>
           </div>
         </div>
@@ -110,16 +148,39 @@
 
       </div>
 
-      <!-- Sidebar Widgets Column -->
       <div class="col-md-4">
 
         <!-- friends -->
         <div class="card my-4" >
           <h5 class="card-header">friends</h5>
           <div class="card-body">
-            <select name = 'friends' class="form-control">
-              <option value='' selected>--selected--</option>
+            <select name = "friends" id="friends" class="form-control" multiple="multiple">
+
             </select>
+            <br>
+            <button type="submit" class="btn btn-primary" id="addOpt" onclick="submit()">fetch</button>
+            <button type="submit" class="btn btn-primary" onclick="select_code()">select</button>
+            <button type="submit" class="btn btn-primary" onclick="cancel_code()">select cancel</button>
+            <br><br>
+            <script>
+              var friend = new Array();
+              var fvalue = new Array();
+              let submit= () => {
+                fetch('https://serviceoriented.ml:5000/friend').then(response=> response.json()).then(json => {
+                  for(var i = 0;i<json.total_count;i++){
+                    friend[i] = json.elements[i].profile_nickname;
+                    fvalue[i] = json.elements[i].uuid;
+                    var option = $("<option value='"+String(fvalue[i]+" "+friend[i])+"'>"+friend[i]+"</option>");
+                    $("#friends").append(option);
+                    console.log(String(fvalue[i]+" "+friend[i]).split(' '));
+                  }
+                });
+              }
+            </script>
+              <div>
+                  <ul id="selList">
+                  </ul>
+              </div>
           </div>
         </div>
 
@@ -144,7 +205,83 @@
   <!-- Bootstrap core JavaScript -->
   <script src="static/vendor/jquery/jquery.min.js"></script>
   <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-
 </body>
-
+<script>
+    var code = new Array();
+    var name = new Array();
+    function submitClick() {
+        url = 'https://serviceoriented.ml:5000/friend_message';
+        var myMessage = $("#messageBox").val().trim();
+        console.log(code);
+        if (myMessage == "") {
+            alert("내용을 입력하세요.");
+            return false;
+        }
+        fetch(url, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            }, 
+            body: JSON.stringify({
+                "message":myMessage,
+                "friends":code
+            })
+        }
+                ).then((response)=>response.json()).then((data)=>console.log(data));
+    }
+    function fbLinkBtnClick() {
+        location.href = 'https://www.facebook.com/v9.0/dialog/oauth?client_id=822581321822671&redirect_uri=https://serviceoriented.ml:5000/fb-login/oauth&scope=user_posts'
+    }
+    fbposts = new Array();
+    function fbLoadBtnClick() {
+        url = 'https://serviceoriented.ml:5000/fb-posts';
+        fetch(url).then((response)=>response.json()).then(Array=>{
+            for (var i=0; i<Array.length; i++) {
+                fbposts.push(Array[i]);
+            }
+            for (var i in fbposts) {
+                var option = $("<option value="+fbposts[i] +">"+fbposts[i]+"</option>");
+                              $("#fb_posts").append(option);
+            }
+        });
+    }
+    
+    let fb_postSelect = document.getElementById("fb_posts");
+    let fb_selectEvent = function(){
+    let fb_text = fb_postSelect.options[fb_postSelect.selectedIndex].text;
+    console.log(fb_text);
+    document.getElementById("messageBox").value = fb_text;
+    }
+                  
+    function select_code(){
+                var obj = document.getElementById("friends");
+                for (var i=0,cnt=obj.options.length;i<cnt;i++) {
+                     if (obj.options[i].selected == true){
+                        var valueSplit = obj.options[i].value.split(' ');
+                        code[i] = valueSplit[0];
+                        name[i] = valueSplit[1];
+                        console.log(valueSplit[1]);
+                        var plusLi = document.createElement('li');
+                        plusLi.innerText = valueSplit[1];
+                        document.getElementById("selList").appendChild(plusLi);
+                     }
+                }
+    }
+    function cancel_code(){
+                var obj = document.getElementById("friends");
+                var deleteLi = document.getElementById("selList");
+                for (var i=0,cnt=obj.options.length;i<cnt;i++) {
+                     if (obj.options[i].selected == true){
+                        obj.options[i].selected = false;
+                     }
+                     console.log(obj.options[i].selected);
+                 }
+                while (deleteLi.hasChildNodes()) {
+                    deleteLi.removeChild(deleteLi.firstChild);
+                }
+               }
+    function loginFirst() {
+        alert("먼저 로그인해주세요.");
+    }
+</script>
 </html>

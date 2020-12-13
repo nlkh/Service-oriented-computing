@@ -73,7 +73,7 @@
               <div class="form-group">
                 <textarea class="form-control" rows="10"></textarea>
               </div>
-              <button type="submit" class="btn btn-primary">Submit</button>
+              <button type="button" class="btn btn-primary" name="submitBtn" onclick="submit('누름')">Submit</button>
             </form>
           </div>
         </div>
@@ -146,5 +146,12 @@
   <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
 
 </body>
-
+<script>
+    window.submit = function(element) {
+        alert(element);
+    }
+    function loginFirst() {
+        alert("먼저 로그인해주세요.");
+    }
+</script>
 </html>

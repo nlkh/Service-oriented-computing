@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for, request, redirect
+from flask import Flask, render_template, request, url_for, request, redirect, jsonify
 import requests
 import json
 import facebook
@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 fb_access_token = ""
 kakao_access_token = ""
-
+globalpost = None
 @app.route('/')
 def hello_world():
     if kakao_access_token == "" :
@@ -42,11 +42,19 @@ def oauth():
 
     response = requests.get(url, headers=headers)
 
+    return redirect("https://serviceoriented.ml:5000/")
+
+@app.route('/friend')
+def friend():
+    headers = {
+        'Content-Type': "application/x-www-form-urlencoded",
+        'Authorization': "Bearer " + str(kakao_access_token),
+    }
+
     url = "https://kapi.kakao.com/v1/api/talk/friends"  ##친구 목록 불러오기
     response = requests.get(url, headers=headers)
 
-    return redirect("https://serviceoriented.ml:5000/")
-
+    return response.json()
 
 def token():
     global kakao_access_token
@@ -72,20 +80,26 @@ def kakaostory():
                             headers={"Authorization":f"Bearer {kakao_access_token}"})
     return response.text
 
-@app.route('/friend_message')
+@app.route('/friend_message', methods=['POST'])
 def friend_message():
     global kakao_access_token
-    print(kakao_access_token)
+    global globaluuids
+    message = request.get_json()['message']
+    globaluuids = request.get_json()['friends']
+    
+    if None in globaluuids :
+        globaluuids.remove(None)
+        
     headers = {
         'Authorization': "Bearer " + str(kakao_access_token),
     }
     url = "https://kapi.kakao.com/v1/api/talk/friends/message/default/send"  ##친구에게 메시지 보내기
 
-    uuidsData = {'receiver_uuids': '["iLmOvIi7jbiNoZivn6uarJigjLmJuYy4geA"]'}
-
+    uuidsData = {'receiver_uuids': json.dumps(globaluuids)}
+   
     post = {
         "object_type": "text",
-        "text": "hello",
+        "text": message,
         "link": {
             "web_url": "https://developers.kakao.com",
         },
@@ -96,12 +110,8 @@ def friend_message():
     uuidsData.update(data)
 
     response = requests.post(url, headers=headers, data=uuidsData)
-
-    if response.status_code == 200:
-        return "sucess"
-    else:
-        print(response.status_code)
-        return response.text
+    
+    return jsonify(response.text)
 
 @app.route('/logout')
 def logout():
@@ -126,15 +136,35 @@ def fb_oauth():
 
     response = requests.request("GET", url)
     fb_access_token = str(json.loads(response.text)['access_token'])
-    return response.text
+    return redirect("https://serviceoriented.ml:5000/")
 
 @app.route('/fb-posts')
 def load_posts() :
+    global globalpost
     graph = facebook.GraphAPI(access_token=fb_access_token, version="3.1")
     post = graph.get_object(id='me', fields='posts')
-    return str(post['posts']['data'])
+    globalpost = post['posts']['data']
+    postList = []
+    for i in globalpost :
+        if 'message' in i :
+            postList.append(i['message'])
+    '''
+    myPost = {'message':[]}
+    for i in post['posts']['data'] :
+        myPost['message'].append(i['message'])
+    return jsonify(myPost)
+'''
+    return jsonify(postList)
 
-
+@app.route('/check')
+def check() :
+    global globalpost
+    myList = []
+    for i in globalpost :
+        if 'message' in i :
+            myList.append(i['message'])
+    
+    return str(myList)
 
 host_addr = "0.0.0.0"
 port_num = "5000"
