@@ -35,10 +35,10 @@
             </a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">Services</a>
+            <a class="nav-link" href="https://serviceoriented.ml:5000/">Services</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="#">API Specification</a>
+            <a class="nav-link" href="https://serviceoriented.ml:5000/about1">API Specification</a>
           </li>
         </ul>
       </div>
@@ -132,6 +132,7 @@
                               content2[key] = data[key].content;
                               var option = $("<option value="+content2[key] +">"+content2[key]+"</option>");
                               $("#kakao_story_post").append(option);
+                              console.log(data)
                              }
                           }
                         })
@@ -227,7 +228,7 @@
                 "friends":code
             })
         }
-                ).then((response)=>response.json()).then((data)=>console.log(data));
+                ).then((response)=>response.json()).then((json)=>alert("전송 성공"));
     }
     function fbLinkBtnClick() {
         location.href = 'https://www.facebook.com/v9.0/dialog/oauth?client_id=822581321822671&redirect_uri=https://serviceoriented.ml:5000/fb-login/oauth&scope=user_posts'
@@ -243,6 +244,7 @@
                 var option = $("<option value="+fbposts[i] +">"+fbposts[i]+"</option>");
                               $("#fb_posts").append(option);
             }
+            console.log(Array);
         });
     }
     

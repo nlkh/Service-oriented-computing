@@ -1,0 +1,100 @@
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="">
+  <meta name="author" content="">
+
+  <title>API 명세</title>
+
+  <!-- Bootstrap core CSS -->
+  <link href="static/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom styles for this template -->
+  <link href="static/css/shop-item.css" rel="stylesheet">
+
+</head>
+
+<body>
+
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+    <div class="container">
+      <a class="navbar-brand" href="https://serviceoriented.ml:5000/">Multi Message</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarResponsive">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="https://serviceoriented.ml:5000/">Services</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="https://serviceoriented.ml:5000/about1">API Specification</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Page Content -->
+  <div class="container">
+
+    <div class="row">
+
+      <div class="col-lg-3">
+        <h1 class="my-4">API LIST</h1>
+        <div class="list-group">
+          <a href="https://serviceoriented.ml:5000/about1" class="list-group-item active">kakao talk API</a>
+          <a href="https://serviceoriented.ml:5000/about2" class="list-group-item">facebook API</a>
+          <a href="https://serviceoriented.ml:5000/about3" class="list-group-item">kakao story API</a>
+        </div>
+      </div>
+      <!-- /.col-lg-3 -->
+
+      <div class="col-lg-9">
+
+        <!-- /.card -->
+        <div class="card card-outline-secondary my-4">
+          <div class="card-header">
+            Kakao Talk API Reviews
+          </div>
+          <div class="card-body">
+            <h5>카카오톡 친구 목록 받기</h5>
+            <p>카카오톡 메시지를 보내기 위해 친구목록을 카카오 API로 부터 받아옵니다. 카카오 로그인 과정이 사전에 필요합니다. 반환은 친구 식별을 위한 id, 친구 이름인 Profile_nickname, 친구에게 메시지를 보내기 위한 고유 id인 uuid로 구성됩니다. 친구 이름은 친구가 설정한 이름이 기본적으로 적용되며 사용자가 임의의 별명을 붙였을 경우 별명 형태로 반환됩니다. 카카오계정에 연결된 카카오톡이 없다면 에러 응답을 받습니다.</p>
+            <img class="card-img-top img-fluid" src="static/about1-1.JPG" alt="">
+            <hr>
+            <h5>카카오 메시지</h5>
+            <p>현재 로그인한 사용자의 카카오계정에 연결된 카카오톡을 통해 친구들에게 메시지를 보내는 기능입니다. 액세스 토큰을 헤더에 담아 POST로 요청합니다. 나에게 메시지 보내기와 달리, 메시지를 받을 친구의 카카오톡 uuid를 receiver_uuids 파라미터로 필수 전달해야 합니다. 친구 목록 가져오기 API를 통해 카카오톡 친구들의 uuid를 받을 수 있습니다. 응답은 JSON 형식으로 받으며 메시지 보내기에 성공한 사용자 목록 배열을 받습니다.</p>
+            <img class="card-img-top img-fluid" src="static/about1-2.JPG" alt="">
+
+          </div>
+        </div>
+
+
+      </div>
+      <!-- /.col-lg-9 -->
+
+    </div>
+
+  </div>
+  <!-- /.container -->
+
+  <!-- Footer -->
+  <footer class="py-5 bg-dark">
+    <div class="container">
+      <p class="m-0 text-center text-white">Copyright &copy; Your Website 2020</p>
+    </div>
+    <!-- /.container -->
+  </footer>
+
+  <!-- Bootstrap core JavaScript -->
+  <script src="static/vendor/jquery/jquery.min.js"></script>
+  <script src="static/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>
